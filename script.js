@@ -1,27 +1,84 @@
-function displayBirthday() {
-   const name = document.getElementById('name').value;
-   const age = document.getElementById('age').value;
-   const dob = new Date(document.getElementById('dob').value);
-   const picture = document.getElementById('picture').files[0];
+window.addEventListener("load", () => {
 
-   const reader = new FileReader();
-   reader.onload = function (e) {
-      document.getElementById('birthdayImage').src = e.target.result;
-   };
-   reader.readAsDataURL(picture);
+  /* ===== Musik (fade in aman browser) ===== */
+  const audio = document.getElementById("birthdayAudio");
 
-   document.getElementById('birthdayName').textContent = `Today is ${name}'s Birthday`;
-   document.getElementById('birthdayAge').textContent = `${age} years old`;
-   document.getElementById('birthdayDate').textContent = dob.toLocaleDateString();
+  if (audio) {
+    audio.volume = 0;
 
-   document.getElementById('birthdayHeader').style.display = 'block';
+    const playAudio = () => {
+      audio.play().catch(() => {});
+    };
 
-   const giftSections = document.querySelectorAll('.gift-section, .footer');
-   giftSections.forEach((section) => (section.style.display = 'block'));
+    // play pertama (jika browser mengizinkan)
+    playAudio();
 
-   document.querySelector('.form-container').style.display = 'none';
+    // fallback: klik sekali di mana saja
+    document.body.addEventListener("click", playAudio, { once: true });
 
-   // Play the audio
-   const audio = document.getElementById('birthdayAudio');
-   audio.play();
+    // fade in volume
+    let vol = 0;
+    const fadeIn = setInterval(() => {
+      if (vol < 0.5) {
+        vol += 0.02;
+        audio.volume = vol;
+      } else {
+        clearInterval(fadeIn);
+      }
+    }, 180);
+  }
+
+  /* ===== Confetti pembuka (lembut) ===== */
+  if (typeof confetti === "function") {
+    confetti({
+      particleCount: 160,
+      spread: 90,
+      origin: { y: 0.65 }
+    });
+  }
+
+  /* ===== Scroll reveal (langsung cek awal) ===== */
+  revealOnScroll();
+});
+
+
+/* ===== Modal kejutan ===== */
+const lastGift = document.querySelector(".cheers-gif");
+const modal = document.getElementById("surpriseModal");
+
+if (lastGift && modal) {
+  lastGift.addEventListener("click", () => {
+    modal.style.display = "flex";
+
+    if (typeof confetti === "function") {
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.7 }
+      });
+    }
+  });
 }
+
+function closeModal() {
+  if (modal) modal.style.display = "none";
+}
+
+
+/* ===== Scroll reveal logic ===== */
+const reveals = document.querySelectorAll(".reveal");
+
+function revealOnScroll() {
+  const windowHeight = window.innerHeight;
+
+  reveals.forEach((el) => {
+    const elementTop = el.getBoundingClientRect().top;
+    const elementVisible = 120;
+
+    if (elementTop < windowHeight - elementVisible) {
+      el.classList.add("active");
+    }
+  });
+}
+
+window.addEventListener("scroll", revealOnScroll);
